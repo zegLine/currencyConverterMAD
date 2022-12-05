@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="Share"
+        app:actionProviderClass="androidx.appcompat.widget.ShareActionProvider"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/currency_list_menu_entry"
+        android:title="Currency List"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/refresh_rates_menu_entry"
+        android:title="Load from ECB"
+        app:showAsAction="never" />
+</menu>

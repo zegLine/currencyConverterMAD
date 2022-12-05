@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/spinner_element_lin_layout"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/spinner_flag_element"
+        android:layout_width="45dp"
+        android:layout_height="45dp"></ImageView>
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/spinner_text_element">
+    </TextView>
+
+</LinearLayout>
