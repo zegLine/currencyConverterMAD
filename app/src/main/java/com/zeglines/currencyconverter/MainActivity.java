@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     // Initialize the custom adapter
     CurrencyItemAdapter adapter = new CurrencyItemAdapter(forexDb);
 
+    SharedPreferences prefs;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         //Inflate menu obj from resource file
@@ -78,6 +80,15 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("Currency Converter", "Clicked on REFRESH RATES FROM ECB");
                 CurrencyUpdater.updateCurrencies(forexDb);
 
+                // instantiate a shared preferences editor and store the currency rates as preferences starting with 'rate'
+                SharedPreferences.Editor editor = prefs.edit();
+                for (String c : forexDb.getCurrencies()) {
+                    double rate = forexDb.getExchangeRate(c);
+                    editor.putString("rate" + c, String.valueOf(rate));
+                    Log.i("CurrencyConvertor", c + " " + String.valueOf(rate));
+                }
+                editor.apply();
+
                 return true;
 
             default:
@@ -90,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        prefs = getPreferences(Context.MODE_PRIVATE);
 
         // TEMP Bypass thread policy and do networking on the GUI Main thread
         StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -113,6 +126,20 @@ public class MainActivity extends AppCompatActivity {
         // Set the created adapter to the spinners
         from_value_spinner.setAdapter(adapter);
         to_value_spinner.setAdapter(adapter);
+
+        // Update values of rates if they are in the preferences
+        // (have been previously updated from the ECB API)
+
+        for (String c : forexDb.getCurrencies()) {
+            String newValue = prefs.getString("rate" + c, "NOT_EXIST");
+
+
+            if (!newValue.equals("NOT_EXIST")) {
+                Log.i("CurrencyConverter", "Updating rate from previous session for " + c);
+                double newValueDouble = Double.parseDouble(newValue);
+                forexDb.setExchangeRate(c, newValueDouble);
+            }
+        }
     }
 
     public void calculateConversion(View v) {
@@ -144,8 +171,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-
-        SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = prefs.edit();
 
