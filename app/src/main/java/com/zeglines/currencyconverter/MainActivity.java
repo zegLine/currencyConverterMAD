@@ -6,7 +6,9 @@ import androidx.appcompat.widget.ShareActionProvider;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.MenuItemCompat;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.Editable;
@@ -30,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     TextView result_text_view;
 
     ShareActionProvider shareActionProvider;
+
+    // Initialize the custom adapter
+    CurrencyItemAdapter adapter = new CurrencyItemAdapter(forexDb);
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -97,9 +102,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Initialize the custom adapter
-        CurrencyItemAdapter adapter = new CurrencyItemAdapter(forexDb);
-
         // Get spinner views
         from_value_spinner = findViewById(R.id.from_value_spinner);
         to_value_spinner = findViewById(R.id.to_value_spinner);
@@ -137,5 +139,52 @@ public class MainActivity extends AppCompatActivity {
         // Update the share text
         setShareText(amount_text.getText().toString() + " " + from_cur + " is " + String.valueOf(result) + " " + to_cur);
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = prefs.edit();
+
+        editor.putString("FromCurrency", (String) from_value_spinner.getSelectedItem());
+        editor.putString("ToCurrency", (String) to_value_spinner.getSelectedItem());
+        editor.putString("ValueToConvert", amount_text.getText().toString());
+
+        editor.apply();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
+
+        String valueToConvert = prefs.getString("ValueToConvert", "10.0");
+        amount_text.setText(valueToConvert);
+        Log.i("Currency Converter", "Resumed VALUETOCONVERT is " + valueToConvert);
+
+        String fromCurrency = prefs.getString("FromCurrency", "EUR");
+        from_value_spinner.setSelection(getIndex(from_value_spinner, fromCurrency));
+        Log.i("Currency Converter", "Resumed FROMVALUE is " + fromCurrency);
+
+
+        String toCurrency = prefs.getString("ToCurrency", "AUD");
+        to_value_spinner.setSelection(getIndex(to_value_spinner, toCurrency));
+        Log.i("Currency Converter", "Resumed TOVALUE is " + toCurrency);
+
+    }
+
+    private int getIndex(Spinner spinner, String mystr) {
+        int index = 0;
+
+        for (int i = 0; i < spinner.getCount(); i++) {
+            if (spinner.getItemAtPosition(i).equals(mystr)) {
+                index = i;
+            }
+        }
+        return index;
     }
 }
