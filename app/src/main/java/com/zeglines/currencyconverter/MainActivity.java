@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     CurrencyItemAdapter adapter = new CurrencyItemAdapter(forexDb);
 
     SharedPreferences prefs;
+
+    //CurrencyConverterNotifier notifier;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -80,6 +83,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("Currency Converter", "Clicked on REFRESH RATES FROM ECB");
                 CurrencyUpdater.updateCurrencies(forexDb);
 
+                // Show toast that currencies have been updated
+                Toast toast = Toast.makeText(this, "Currencies have been updated", Toast.LENGTH_SHORT);
+                toast.show();
+
+                //notifier.showOrUpdateNotification();
+
                 // instantiate a shared preferences editor and store the currency rates as preferences starting with 'rate'
                 SharedPreferences.Editor editor = prefs.edit();
                 for (String c : forexDb.getCurrencies()) {
@@ -101,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //this.notifier = new CurrencyConverterNotifier(getBaseContext());
 
         prefs = getPreferences(Context.MODE_PRIVATE);
 
