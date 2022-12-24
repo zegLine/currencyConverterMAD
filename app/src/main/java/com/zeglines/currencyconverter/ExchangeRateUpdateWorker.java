@@ -1,9 +1,11 @@
 package com.zeglines.currencyconverter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -12,11 +14,26 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class CurrencyUpdater {
+public class ExchangeRateUpdateWorker extends Worker {
+
+    public ExchangeRateUpdateWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        Log.i("CurrencyConverterWORKER", "Started Work!");
+
+        updateCurrencies();
+
+        Log.i("CurrencyConverterWORKER", "Finished Work!");
+        return Result.success();
+    }
 
     private static final String ECB_API = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 
-    public static void updateCurrencies(ExchangeRateDatabase db) {
+    public static void updateCurrencies() {
 
         try {
 
@@ -24,9 +41,11 @@ public class CurrencyUpdater {
             URL url = new URL(ECB_API);
 
             // Initiate the connection
+            Log.i("CurrencyConverterWORKER", "Initiate connection with ECB");
             URLConnection conn = url.openConnection();
 
             // Get the input stream
+            Log.i("CurrencyConverterWORKER", "Getting input stream");
             InputStream inputStream = conn.getInputStream();
 
             // Get Encoding
@@ -42,6 +61,7 @@ public class CurrencyUpdater {
             int eventType = parser.getEventType();
 
             // Move parser head until the end of the XML document
+            Log.i("CurrencyConverterWORKER", "Parsing XML data...");
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 // If it found a starting tag inspect
                 if (eventType == XmlPullParser.START_TAG) {
@@ -50,9 +70,11 @@ public class CurrencyUpdater {
                         // Get the currency name and value as the first and second attribute of the XML element
                         String currency = parser.getAttributeValue(0);
                         String newValue = parser.getAttributeValue(1);
+                        Log.i("CurrencyConverterWORKER", "Found data point for currency " + currency + " with value + " + newValue);
+
 
                         // Set exchange rate using public method
-                        db.setExchangeRate(currency, Double.parseDouble(newValue));
+                        ExchangeRateDatabase.setExchangeRate(currency, Double.parseDouble(newValue));
                     }
                 }
 

@@ -5,6 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.ShareActionProvider;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.MenuItemCompat;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,7 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-
     Spinner from_value_spinner;
     Spinner to_value_spinner;
     EditText amount_text;
@@ -81,7 +84,11 @@ public class MainActivity extends AppCompatActivity {
                 // Get rates from ECB button
             case R.id.refresh_rates_menu_entry:
                 Log.i("Currency Converter", "Clicked on REFRESH RATES FROM ECB");
-                CurrencyUpdater.updateCurrencies(forexDb);
+
+                // Start CurrencyUpdate Work thread
+                WorkRequest updateCurrenciesRequest = new OneTimeWorkRequest.Builder(ExchangeRateUpdateWorker.class)
+                        .build();
+                WorkManager.getInstance(this).enqueue(updateCurrenciesRequest);
 
                 // Show toast that currencies have been updated
                 Toast toast = Toast.makeText(this, "Currencies have been updated", Toast.LENGTH_SHORT);
@@ -114,10 +121,6 @@ public class MainActivity extends AppCompatActivity {
         //this.notifier = new CurrencyConverterNotifier(getBaseContext());
 
         prefs = getPreferences(Context.MODE_PRIVATE);
-
-        // TEMP Bypass thread policy and do networking on the GUI Main thread
-        StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(threadPolicy);
 
         //initialize a string array with currency names
         String[] currencies = forexDb.getCurrencies();

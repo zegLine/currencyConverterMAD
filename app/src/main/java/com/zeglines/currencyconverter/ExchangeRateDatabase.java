@@ -72,7 +72,7 @@ public class ExchangeRateDatabase {
         return CURRENCIES_MAP.get(currency).getRateForOneEuro();
     }
 
-    public String getCapital(String currency) {
+    public static String getCapital(String currency) {
         return CURRENCIES_MAP.get(currency).getCapital();
     }
 
@@ -84,7 +84,7 @@ public class ExchangeRateDatabase {
         return value / getExchangeRate(currencyFrom) * getExchangeRate(currencyTo);
     }
 
-    public void setExchangeRate(String currency, double newRate) {
+    public static void setExchangeRate(String currency, double newRate) {
         CURRENCIES_MAP.put(currency, new ExchangeRate(
                 currency,
                 getCapital(currency),
